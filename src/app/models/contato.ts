@@ -1,14 +1,21 @@
 export class Contato {
+  private _id: any;
   private _nome: string;
   private _telefone: number;
   private _genero: string;
   private _data_nascimento: string;
 
   constructor(nome: string, telefone: number, genero: string, data_nascimento: string){
+    let chave = new Date;
+    this._id = chave.getTime();
     this._nome = nome;
     this._telefone = telefone;
     this._genero = genero;
     this._data_nascimento = data_nascimento;
+  }
+
+  public get id(): any{
+    return this._id;
   }
 
   public get nome(): string{
