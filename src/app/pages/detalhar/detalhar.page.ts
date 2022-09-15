@@ -28,6 +28,7 @@ export class DetalharPage implements OnInit {
     this.contato = nav.extras.state.objeto;
     this.data = new Date().toISOString();
     this.nome = this.contato.nome;
+    //  nome: [this.contato.nome, [Validators.required]],
     this.telefone = this.contato.telefone;
     this.genero = this.contato.genero;
     this.dataNascimento = this.contato.data_nascimento
