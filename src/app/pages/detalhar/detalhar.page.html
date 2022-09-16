@@ -1,42 +1,75 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Agenda de Contatos</ion-title>
+    <ion-title>Detalhar</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-label>Detalhes do Contato</ion-label>
+  <ion-item>
+    <ion-label>Habilitar Edição</ion-label>
+    <ion-toggle color="success"
+    (ionChange)="alterarEdicao()"></ion-toggle>
+  </ion-item>
+  <ion-label>Detalhes do Contatos</ion-label>
   <ion-list>
+    <form [formGroup]="form_cadastrar" (ngSubmit)="submitForm()">
     <ion-item>
-      <ion-label>Habilitar Edição</ion-label>
-      <ion-toggle color="success"
-      (ionChange)="alterarEdicao()"></ion-toggle>
+      <ion-input placeholder="Nome" formControlName="nome"></ion-input>
+    </ion-item>
+    <ion-item *ngIf="((errorControl.nome.touched) ||
+    (errorControl.nome.dirty) && errorControl.nome.errors)">
+        <span *ngIf="errorControl.nome.errors?.required">
+            Nome é Obritatório!
+        </span>
     </ion-item>
     <ion-item>
-      <ion-input disabled="{{edicao}}" placeholder="Nome" [(ngModel)]="nome"></ion-input>
+      <ion-input placeholder="Telefone" formControlName="telefone"
+      [brmasker]="{mask:'(00)00000-0000', len:14}"></ion-input>
+    </ion-item>
+    <ion-item *ngIf="((errorControl.telefone.touched) ||
+    (errorControl.telefone.dirty) && errorControl.telefone.errors)">
+        <span *ngIf="errorControl.telefone.errors?.required">
+            Telefone é Obritatório!
+        </span>
+        <span *ngIf="errorControl.telefone.errors?.minlength">
+          Telefone precisa ter 10 caracteres!
+      </span>
     </ion-item>
     <ion-item>
-      <ion-input disabled="{{edicao}}" placeholder="Telefone" [(ngModel)]="telefone" type="number"></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-select disabled="{{edicao}}"  placeholder="Selecione o Genero" [(ngModel)]="genero">
+      <ion-select placeholder="Selecione o Genero" formControlName="genero">
         <ion-select-option value="masculino">Masculino</ion-select-option>
         <ion-select-option value="feminino">Feminino</ion-select-option>
-        <ion-select-option value="não-declarar">Não Declarar</ion-select-option>
+        <ion-select-option value="não declarado">Não declarar</ion-select-option>
       </ion-select>
     </ion-item>
+    <ion-item *ngIf="((errorControl.genero.touched) ||
+    (errorControl.genero.dirty) && errorControl.genero.errors)">
+        <span *ngIf="errorControl.genero.errors?.required">
+            Genero é Obritatório!
+        </span>
+    </ion-item>
     <ion-item>
-      <ion-label>Data de nascimento:</ion-label>
-      <ion-datetime-button disabled="{{edicao}}"  datetime="datetime"></ion-datetime-button>
+      <ion-label>Data de Nascimento:</ion-label>
+      <ion-datetime-button datetime="datetime"></ion-datetime-button>
       <ion-modal [keepContentsMounted]="true">
         <ng-template>
-          <ion-datetime id="datetime" max="{{data}}"
-          presentation="date" [(ngModel)]="dataNascimento"></ion-datetime>
+          <ion-datetime formControlName="data_nascimento" id="datetime"
+          presentation="date" max="{{data}}"></ion-datetime>
         </ng-template>
       </ion-modal>
     </ion-item>
+    <ion-item *ngIf="((errorControl.data_nascimento.touched) ||
+    (errorControl.data_nascimento.dirty) && errorControl.data_nascimento.errors)">
+        <span *ngIf="errorControl.data_nascimento.errors?.required">
+            Data de Nascimento é Obritatória!
+        </span>
+    </ion-item>
+    <ion-button expand="block" type="submit">Salvar</ion-button>
+  </form>
   </ion-list>
-  <ion-button disabled="{{edicao}}" expand="block" (click)="editar()">Salvar</ion-button>
-  <ion-button  disabled="{{edicao}}"  expand="block" (click)="excluir()" color="danger">
-    Excluir</ion-button>
+  <ion-button disabled="{{edicao}}" expand="block"
+  (click)="excluir()" color="danger">Excluir</ion-button>
+
+
+
 </ion-content>

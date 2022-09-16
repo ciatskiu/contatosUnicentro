@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { TouchSequence } from 'selenium-webdriver';
@@ -12,105 +13,117 @@ import { ContatoService } from 'src/app/services/contato.service';
 })
 export class DetalharPage implements OnInit {
   contato: Contato;
-  nome: string;
-  telefone: number;
-  genero: string;
-  dataNascimento: string;
   data: string;
   edicao: boolean = true;
+  form_cadastrar: FormGroup;
+  isSubmitted: boolean = false;
 
   constructor(private router: Router,
     private alertController: AlertController,
-    private contatoService: ContatoService) { }
+    private contatoService: ContatoService,
+    private formBuilder: FormBuilder) { }
 
   ngOnInit() {
+    this.data = new Date().toISOString();
     const nav = this.router.getCurrentNavigation();
     this.contato = nav.extras.state.objeto;
-    this.data = new Date().toISOString();
-    this.nome = this.contato.nome;
-    //  nome: [this.contato.nome, [Validators.required]],
-    this.telefone = this.contato.telefone;
-    this.genero = this.contato.genero;
-    this.dataNascimento = this.contato.data_nascimento
+    console.log(this.contato);
+    this.form_cadastrar = this.formBuilder.group({
+      nome:[this.contato.nome ,[Validators.required]],
+      telefone:[this.contato.telefone,[Validators.required, Validators.minLength(10)]],
+      genero:[this.contato.genero,[Validators.required]],
+      data_nascimento:[this.contato.data_nascimento ,[Validators.required]]
+    });
   }
 
-  alterarEdicao(){
-    if(this.edicao == true){
-      this.edicao = false;
+  get errorControl(){
+    return this.form_cadastrar.controls;
+  }
+
+  submitForm(): boolean{
+    this.isSubmitted = true;
+    if(!this.form_cadastrar.valid){
+      this.presentAlert("Agenda", "Erro",
+      "Todos os campos são Obrigatórios!");
+      return false;
     }else{
+      this.editar();
+    }
+  }
+
+  alterarEdicao(): void{
+    if(this.edicao == false){
       this.edicao = true;
+    }else{
+      this.edicao = false;
     }
   }
 
   editar(){
-    this.dataNascimento = this.dataNascimento.split('T')[0];
-   if((this.validar(this.nome)) && this.validar(this.telefone)
-   && (this.validar(this.genero) &&(this.validar(this.dataNascimento)))){
-      if(this.contatoService.editar(this.contato, this.nome,
-        this.telefone, this.genero, this.dataNascimento)){
-          this.presentAlert("Agenda", "Sucesso",
-           "Dados do Cliente Editado!");
-          this.router.navigate(["/home"]);
-      }else{
-        this.presentAlert("Agenda", "Erro",
-        "Contato Não Encontrado!");
-      }}else{
-    this.presentAlert("Agenda", "Erro",
-    "Todos os campos são Obrigatórios!");
-   }
+    this.contatoService.editar(this.contato, this.form_cadastrar.value['nome'],
+    this.form_cadastrar.value['telefone'], this.form_cadastrar.value['genero'],
+    this.form_cadastrar.value['data_nascimento']);
+    this.presentAlert("Agenda", "Sucesso", "Edição Realizado");
+    this.router.navigate(["/home"]);
   }
 
-  excluir(){
+  excluir(): void{
     this.presentAlertConfirm("Agenda", "Excluir Contato",
-    "Você realmente deseja excluir o contato?",  this.excluirContato());
+    "Você realmente deseja excluir o contato?",
+    this.excluirContato());
   }
 
-  private excluirContato(){
+excluirContato(){
     if(this.contatoService.excluir(this.contato)){
-      this.presentAlert("Agenda", "Excluir", "Exclusão Realizada");
+      this.presentAlert("Agenda", "Sucesso", "Cadastro Excluído!");
       this.router.navigate(["/home"]);
     }else{
-      this.presentAlert("Agenda", "Excluir", "Contato Não Encontrado!");
+      this.presentAlert("Agenda", "Erro", "Contato Não Encontrado!");
     }
   }
 
-  private validar(campo: any): boolean{
+//no trabalho deverão estar em outro arquivo
+  private validar(campo: any) : boolean{
     if(!campo){
       return false;
     }
     return true;
   }
 
-  async presentAlert(header: string, subHeader: string,
-    message: string) {
+  async presentAlert(cabecalho: string, subcabecalho: string,
+    mensagem: string) {
     const alert = await this.alertController.create({
-      header: header,
-      subHeader: subHeader,
-      message: message,
+      header: cabecalho,
+      subHeader: subcabecalho,
+      message: mensagem,
       buttons: ['OK'],
     });
     await alert.present();
   }
 
-  async presentAlertConfirm(header: string, subHeader: string,
-    message: string, acao: any) {
+  async presentAlertConfirm(cabecalho: string,
+    subcabecalho: string, mensagem: string,
+    acao: any) {
     const alert = await this.alertController.create({
-      header: header,
-      subHeader: subHeader,
-      message: message,
+      header: cabecalho,
+      subHeader: subcabecalho,
+      message: mensagem,
       buttons: [
         {
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => {},
+          text:'Cancelar',
+          role:'cancelar',
+          cssClass:'secondary',
+          handler: ()=>{
+            console.log("Cancelou")
+          }
         },
         {
-          text: 'OK',
+          text:'Confirmar',
           role: 'confirm',
-          handler: (acao) => {
+          handler: (acao)=>{
            acao
-          },
-        },
+          }
+        }
       ],
     });
     await alert.present();
