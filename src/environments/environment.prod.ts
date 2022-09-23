@@ -2,7 +2,8 @@ export const environment = {
   production: true,
   firebaseConfig : {
     apiKey: "AIzaSyDNtWkPVuSjshN3Z-XaUlZrtqiqlMDZxvM",
-    authDomain: "appcontatostb.firebaseapp.com",
+    //authDomain: "appcontatostb.firebaseapp.com",
+    authDomain: "localhost",
     projectId: "appcontatostb",
     storageBucket: "appcontatostb.appspot.com",
     messagingSenderId: "371800591909",

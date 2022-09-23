@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-import { TouchSequence } from 'selenium-webdriver';
 import { Contato } from 'src/app/models/contato';
-import { ContatoService } from 'src/app/services/contato.service';
+import { ContatoFirebaseService } from 'src/app/services/contato-firebase.service';
+
 
 @Component({
   selector: 'app-detalhar',
@@ -20,7 +20,7 @@ export class DetalharPage implements OnInit {
 
   constructor(private router: Router,
     private alertController: AlertController,
-    private contatoService: ContatoService,
+    private contatoFS: ContatoFirebaseService,
     private formBuilder: FormBuilder) { }
 
   ngOnInit() {
@@ -60,26 +60,36 @@ export class DetalharPage implements OnInit {
   }
 
   editar(){
-    this.contatoService.editar(this.contato, this.form_cadastrar.value['nome'],
-    this.form_cadastrar.value['telefone'], this.form_cadastrar.value['genero'],
-    this.form_cadastrar.value['data_nascimento']);
-    this.presentAlert("Agenda", "Sucesso", "Edição Realizado");
-    this.router.navigate(["/home"]);
+    this.contatoFS.editarContato(this.form_cadastrar.value,
+      this.contato.id)
+    .then(()=>{
+      this.presentAlert("Agenda", "Sucesso", "Edição Realizado");
+      this.router.navigate(["/home"]);
+    })
+    .catch((error)=>{
+      this.presentAlert("Agenda", "Erro", "Erro ao editar Contato!");
+      console.log(error)
+    })
+
+
+
   }
 
   excluir(): void{
     this.presentAlertConfirm("Agenda", "Excluir Contato",
-    "Você realmente deseja excluir o contato?",
-    this.excluirContato());
+    "Você realmente deseja excluir o contato?");
   }
 
 excluirContato(){
-    if(this.contatoService.excluir(this.contato)){
+    this.contatoFS.excluirContato(this.contato)
+    .then(()=>{
       this.presentAlert("Agenda", "Sucesso", "Cadastro Excluído!");
       this.router.navigate(["/home"]);
-    }else{
+    })
+    .catch((error)=>{
       this.presentAlert("Agenda", "Erro", "Contato Não Encontrado!");
-    }
+      console.log(error);
+    })
   }
 
 //no trabalho deverão estar em outro arquivo
@@ -102,8 +112,7 @@ excluirContato(){
   }
 
   async presentAlertConfirm(cabecalho: string,
-    subcabecalho: string, mensagem: string,
-    acao: any) {
+    subcabecalho: string, mensagem: string) {
     const alert = await this.alertController.create({
       header: cabecalho,
       subHeader: subcabecalho,
@@ -120,8 +129,8 @@ excluirContato(){
         {
           text:'Confirmar',
           role: 'confirm',
-          handler: (acao)=>{
-           acao
+          handler: ()=>{
+           this.excluirContato();
           }
         }
       ],

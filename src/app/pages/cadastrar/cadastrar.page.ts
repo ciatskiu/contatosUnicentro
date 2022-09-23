@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
-import { Contato } from '../../models/contato';
-import { ContatoService } from '../../services/contato.service';
+import { AlertController, LoadingController } from '@ionic/angular';
+import { ContatoFirebaseService } from 'src/app/services/contato-firebase.service';
+
 
 @Component({
   selector: 'app-cadastrar',
@@ -16,8 +16,9 @@ export class CadastrarPage implements OnInit {
   isSubmitted: boolean = false;
 
   constructor(private alertController: AlertController,
+    private loadingCtrl: LoadingController,
     private router: Router,
-    private contatoService: ContatoService,
+    private contatoFS: ContatoFirebaseService,
     private formBuilder: FormBuilder) { }
 
   ngOnInit() {
@@ -46,9 +47,20 @@ export class CadastrarPage implements OnInit {
   }
 
   private cadastrar(){
-    this.contatoService.inserir(this.form_cadastrar.value);
-    this.presentAlert("Agenda", "Sucesso", "Cliente Cadastrado!");
-    this.router.navigate(["/home"]);
+    this.showLoading("Aguarde", 10000);
+    this.contatoFS.inserirContato(this.form_cadastrar.value)
+    .then(()=>{
+      this.loadingCtrl.dismiss();
+      this.presentAlert("Agenda", "Sucesso", "Cliente Cadastrado!");
+      this.router.navigate(["/home"]);
+    })
+    .catch((error)=>{
+      this.loadingCtrl.dismiss();
+      this.presentAlert("Agenda", "Erro", "Erro ao cadastrar Contato!");
+      console.log(error);
+    })
+
+
   }
 
 
@@ -62,6 +74,14 @@ export class CadastrarPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  async showLoading(mensagem: string, duracao: number) {
+    const loading = await this.loadingCtrl.create({
+      message: mensagem,
+      duration: duracao,
+    });
+    loading.present();
   }
 
 
