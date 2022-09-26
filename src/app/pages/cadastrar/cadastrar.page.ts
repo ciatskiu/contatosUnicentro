@@ -14,6 +14,7 @@ export class CadastrarPage implements OnInit {
   data: string;
   form_cadastrar: FormGroup;
   isSubmitted: boolean = false;
+  imagem: any;
 
   constructor(private alertController: AlertController,
     private loadingCtrl: LoadingController,
@@ -27,8 +28,13 @@ export class CadastrarPage implements OnInit {
       nome: ["", [Validators.required]],
       telefone: ["", [Validators.required, Validators.minLength(10)]],
       genero: ["", [Validators.required]],
-      data_nascimento: ["", [Validators.required]]
+      data_nascimento: ["", [Validators.required]],
+      imagem: ["", [Validators.required]]
     });
+  }
+
+  uploadFile(imagem: any){
+    this.imagem = imagem.files;
   }
 
   get errorControl(){
@@ -48,7 +54,8 @@ export class CadastrarPage implements OnInit {
 
   private cadastrar(){
     this.showLoading("Aguarde", 10000);
-    this.contatoFS.inserirContato(this.form_cadastrar.value)
+    this.contatoFS
+    .enviarImagem(this.imagem, this.form_cadastrar.value)
     .then(()=>{
       this.loadingCtrl.dismiss();
       this.presentAlert("Agenda", "Sucesso", "Cliente Cadastrado!");

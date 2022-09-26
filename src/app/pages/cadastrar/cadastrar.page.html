@@ -54,6 +54,14 @@
         </ng-template>
       </ion-modal>
     </ion-item>
+
+    <ion-item>
+      <ion-button size="default" color="success" shape="round">
+        <input type="file" formControlName="imagem"
+          (change)="uploadFile($event.target)"   />
+      </ion-button>
+    </ion-item>
+
     <ion-button expand="block" type="submit">Cadastrar</ion-button>
     </form>
   </ion-list>
